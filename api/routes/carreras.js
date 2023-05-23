@@ -6,7 +6,10 @@ router.get("/", (req, res) => {
   console.log("Esto es un mensaje para ver en consola");
   models.carrera
     .findAll({
-      attributes: ["id", "nombre"]
+      attributes: ["id", "nombre"],
+      include:[
+        {as:'materias',model:models.materia,attributes:["id","nombre"]}
+      ]
     })
     .then(carreras => res.send(carreras))
     .catch(() => res.sendStatus(500));
@@ -31,6 +34,9 @@ const findCarrera = (id, { onSuccess, onNotFound, onError }) => {
   models.carrera
     .findOne({
       attributes: ["id", "nombre"],
+      include:[
+        {as:'materias',model:models.materia,attributes:["id","nombre"]}
+      ],
       where: { id }
     })
     .then(carrera => (carrera ? onSuccess(carrera) : onNotFound()))

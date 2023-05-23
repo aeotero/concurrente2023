@@ -1,7 +1,7 @@
 {
   "development": {
     "username": "root",
-    "password": "root", 
+    "password": "1106", 
     "database": "api_v2",
     "host": "localhost",
     "dialect": "mariadb",
@@ -9,7 +9,10 @@
       "useUTC": false,
       "timezone": "Etc/GMT-0"
     },
-    "operatorsAliases": 1
+    "operatorsAliases": 1,
+    "define":{
+      "freezeTableName": true
+    }
   }
 }
 
