@@ -9,7 +9,8 @@ models.materia
         attributes: ["id", "nombre","id_carrera"],
         include:[
             {as:'carrera_relacionada',model:models.carrera,attributes:["id","nombre"]},
-            {as:'profesor_relacionada',model:models.profesor,attributes:["id","nombre","apellido","edad"]}
+            {as:'profesor_relacionada',model:models.profesor,attributes:["id","nombre","apellido","edad"]},
+            {as:'horario_relacionada',model:models.horario,attributes:["id","dia","inicio","fin"]}
         ]
     })
     .then(materias => res.send(materias))
@@ -22,7 +23,7 @@ models.materia
     .then(materia => res.status(201).send({ id: materia.id }))
     .catch(error => {
     if (error == "SequelizeUniqueConstraintError: Validation error") {
-        res.status(400).send('Bad request: existe otra materia con el mismo nombre')
+        res.status(400).send('Bad request: error al intentar crear una materia')
     }
     else {
         console.log(`Error al intentar insertar en la base de datos: ${error}`)
@@ -37,7 +38,8 @@ models.materia
         attributes: ["id", "nombre","id_carrera"],
         include:[
             {as:'carrera_relacionada',model:models.carrera,attributes:["id","nombre"]},
-            {as:'profesor_relacionada',model:models.profesor,attributes:["id","nombre","apellido","edad"]}
+            {as:'profesor_relacionada',model:models.profesor,attributes:["id","nombre","apellido","edad"]},
+            {as:'horario_relacionada',model:models.horario,attributes:["id","dia","inicio","fin"]}
         ],
         where: { id }
     })
@@ -60,7 +62,7 @@ router.put("/:id", (req, res) => {
     .then(() => res.sendStatus(200))
     .catch(error => {
         if (error == "SequelizeUniqueConstraintError: Validation error") {
-            res.status(400).send('Bad request: existe otra materia con el mismo nombre')
+            res.status(400).send('Bad request: error al intentar actualizar materia')
         }
         else {
             console.log(`Error al intentar actualizar la base de datos: ${error}`)

@@ -13,7 +13,11 @@ module.exports = (sequelize, DataTypes) => {
     materia.hasOne(models.profesor,{
       as: 'profesor_relacionada',
       foreignKey:'id_materia'
-  })
+    }),
+    materia.hasMany(models.horario,{
+      as: 'horario_relacionada',
+      foreignKey: 'id_materia'
+    })
   };
   return materia;
 };

@@ -17,6 +17,9 @@ module.exports = {
             fin: {
                 type: Sequelize.TIME
             },
+            id_materia: {
+                type: Sequelize.INTEGER
+            },
             createdAt: {
                 allowNull: false,
                 type: Sequelize.DATE
