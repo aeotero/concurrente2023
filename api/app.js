@@ -7,8 +7,25 @@ var carrerasRouter = require('./routes/carreras');
 var materiasRouter = require('./routes/materias');
 var profesoresRouter = require('./routes/profesores');
 var horariosRouter = require('./routes/horarios');
+var jwt = require("jsonwebtoken");
 
 var app = express();
+
+// jwt
+
+app.post("/registro", (req , res) => {
+  const usuario = {
+    id: 1,
+    nombre: "admin"
+  }
+
+  jwt.sign({user: usuario},'clave',(err,token)=>{
+    res.json({
+      token
+    })
+  });
+})
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
