@@ -7,6 +7,7 @@ var carrerasRouter = require('./routes/carreras');
 var materiasRouter = require('./routes/materias');
 var profesoresRouter = require('./routes/profesores');
 var horariosRouter = require('./routes/horarios');
+/* var loginRouter = require('./routes/login'); */
 var jwt = require("jsonwebtoken");
 
 var app = express();
@@ -19,12 +20,26 @@ app.post("/registro", (req , res) => {
     nombre: "admin"
   }
 
-  jwt.sign({user: usuario},'clave',(err,token)=>{
+  jwt.sign({user: usuario},'clave',{expiresIn:'120s'},(err,token)=>{
     res.json({
       token
     })
   });
 })
+
+
+// Autorización
+function verificar(req,res,next){
+  const bearerHeader = req.headers['authorization'];
+  if(typeof bearerHeader !== 'undefined'){
+    /* si es distinto a undefined guardo solamente el token sin el Bearer <token>*/
+    const tokenVerificado = bearerHeader.split(" ")[1];
+    req.token = tokenVerificado;
+    next();
+  }else{
+    res.sendStatus(403);
+  }
+}
 
 
 // view engine setup
@@ -41,6 +56,8 @@ app.use('/mat',materiasRouter);
 app.use('/car',carrerasRouter);
 app.use('/pro',profesoresRouter);
 app.use('/hor',horariosRouter);
+/* app.use('/login',loginRouter);*/
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
