@@ -1,6 +1,20 @@
 var express = require("express");
 var router = express.Router();
 var models = require("../models");
+var jwt = require("jsonwebtoken");
+
+// Autorización
+function verificar(req,res,next){
+    const bearerHeader = req.headers['authorization'];
+    if(typeof bearerHeader !== 'undefined'){
+        /* si es distinto a undefined guardo solamente el token sin el Bearer <token>*/
+        const tokenVerificado = bearerHeader.split(" ")[1];
+        req.token = tokenVerificado;
+        next();
+    }else{
+        res.sendStatus(403);
+    }
+}
 
 router.get("/", (req, res) => {
 console.log("Esto es un mensaje para ver en consola");
@@ -17,19 +31,25 @@ models.materia
     .catch(() => res.sendStatus(500));
 });
 
-router.post("/", (req, res) => {
-models.materia
-    .create({ nombre: req.body.nombre,id_carrera: req.body.id_carrera})
-    .then(materia => res.status(201).send({ id: materia.id }))
-    .catch(error => {
-    if (error == "SequelizeUniqueConstraintError: Validation error") {
-        res.status(400).send('Bad request: error al intentar crear una materia')
-    }
-    else {
-        console.log(`Error al intentar insertar en la base de datos: ${error}`)
-        res.sendStatus(500)
-    }
-    });
+router.post("/",verificar, (req, res) => {
+    jwt.verify(req.token,'clave',(error,authData) =>{
+        if(error){
+            res.sendStatus(403);
+        }else{
+            models.materia
+            .create({ nombre: req.body.nombre,id_carrera: req.body.id_carrera})
+            .then(materia => res.status(201).send({ id: materia.id, authData }))
+            .catch(error => {
+                if (error == "SequelizeUniqueConstraintError: Validation error") {
+                    res.status(400).send('Bad request: error al intentar crear una materia')
+                }
+                else{
+                    console.log(`Error al intentar insertar en la base de datos: ${error}`)
+                    res.sendStatus(500)
+                }
+            });
+        }
+    })
 });
 
 const findMateria = (id, { onSuccess, onNotFound, onError }) => {

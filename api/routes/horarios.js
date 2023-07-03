@@ -1,6 +1,20 @@
 var express = require("express");
 var router = express.Router();
 var models = require("../models");
+var jwt = require("jsonwebtoken");
+
+// Autorización
+function verificar(req,res,next){
+    const bearerHeader = req.headers['authorization'];
+    if(typeof bearerHeader !== 'undefined'){
+        /* si es distinto a undefined guardo solamente el token sin el Bearer <token>*/
+        const tokenVerificado = bearerHeader.split(" ")[1];
+        req.token = tokenVerificado;
+        next();
+    }else{
+        res.sendStatus(403);
+    }
+}
 
 router.get("/", (req, res) => {
     console.log("Obteniendo horarios");
@@ -15,19 +29,26 @@ router.get("/", (req, res) => {
     .catch(() => res.sendStatus(500));
 });
 
-router.post("/", (req, res) => {
-    models.horario
-    .create({ dia: req.body.dia, inicio: req.body.inicio, fin: req.body.fin, id_materia: req.body.id_materia })
-    .then(horario => res.status(201).send({ id: horario.id }))
-    .catch(error => {
-        if (error == "SequelizeUniqueConstraintError: Validation error") {
-            res.status(400).send('Bad request: error al crear horario')
+router.post("/",verificar, (req, res) => {
+    jwt.verify(req.token,'clave',(error,authData) => {
+        if(error){
+            /* acceso prohibido */
+            res.sendStatus(403);
+        }else{
+        models.horario
+        .create({ dia: req.body.dia, inicio: req.body.inicio, fin: req.body.fin, id_materia: req.body.id_materia })
+        .then(horario => res.status(201).send({ id: horario.id, authData }))
+        .catch(error => {
+            if (error == "SequelizeUniqueConstraintError: Validation error") {
+                res.status(400).send('Bad request: error al crear horario')
+            }
+            else {
+                console.log(`Error al intentar insertar en la base de datos: ${error}`)
+                res.sendStatus(500)
+            }
+            });
         }
-        else {
-            console.log(`Error al intentar insertar en la base de datos: ${error}`)
-            res.sendStatus(500)
-        }
-    });
+    })
 });
 
 const findHorario = (id, { onSuccess, onNotFound, onError }) => {

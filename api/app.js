@@ -20,7 +20,7 @@ app.post("/registro", (req , res) => {
     nombre: "admin"
   }
 
-  jwt.sign({user: usuario},'clave',{expiresIn:'120s'},(err,token)=>{
+  jwt.sign({user: usuario},'clave',{expiresIn:'180s'},(err,token)=>{
     res.json({
       token
     })
