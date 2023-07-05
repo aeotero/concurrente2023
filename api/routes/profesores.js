@@ -71,38 +71,52 @@ findProfesor(req.params.id, {
 });
 });
 
-router.put("/:id", (req, res) => { 
-    const onSuccess = profesor =>
-    profesor
-    .update({ nombre: req.body.nombre,apellido: req.body.apellido,edad: req.body.edad,id_materia: req.body.id_materia }, { fields: ["nombre","apellido","edad","id_materia"] })
-    .then(() => res.sendStatus(200))
-    .catch(error => {
-        if (error == "SequelizeUniqueConstraintError: Validation error") {
-            res.status(400).send('Bad request: existe otro profesor con el mismo nombre')
+router.put("/:id",verificar, (req, res) => { 
+    jwt.verify(req.token,'clave',(error,authData) => {
+        if(error){
+            /* acceso prohibido */
+            res.sendStatus(403);
+        }else{
+        const onSuccess = profesor =>
+        profesor
+        .update({ nombre: req.body.nombre,apellido: req.body.apellido,edad: req.body.edad,id_materia: req.body.id_materia }, { fields: ["nombre","apellido","edad","id_materia"] })
+        .then(() => res.sendStatus(200))
+        .catch(error => {
+            if (error == "SequelizeUniqueConstraintError: Validation error") {
+                res.status(400).send('Bad request: existe otro profesor con el mismo nombre')
+            }
+            else {
+                console.log(`Error al intentar actualizar la base de datos: ${error}`)
+                res.sendStatus(500)
+            }
+        });
+        findProfesor(req.params.id, {
+        onSuccess,
+        onNotFound: () => res.sendStatus(404),
+        onError: () => res.sendStatus(500)
+        });
         }
-        else {
-            console.log(`Error al intentar actualizar la base de datos: ${error}`)
-            res.sendStatus(500)
-        }
-    });
-    findProfesor(req.params.id, {
-    onSuccess,
-    onNotFound: () => res.sendStatus(404),
-    onError: () => res.sendStatus(500)
-});
+    })
 });
 
-router.delete("/:id", (req, res) => {
-const onSuccess = profesor => 
-    profesor
-        .destroy()
-        .then(() => res.sendStatus(200))
-        .catch(() => res.sendStatus(500));
-    findProfesor(req.params.id, {
-    onSuccess,
-    onNotFound: () => res.sendStatus(404),
-    onError: () => res.sendStatus(500)
-    });
+router.delete("/:id",verificar, (req, res) => {
+    jwt.verify(req.token,'clave',(error,authData) => {
+        if(error){
+            /* acceso prohibido */
+            res.sendStatus(403);
+        }else{
+    const onSuccess = profesor => 
+        profesor
+            .destroy()
+            .then(() => res.sendStatus(200))
+            .catch(() => res.sendStatus(500));
+        findProfesor(req.params.id, {
+        onSuccess,
+        onNotFound: () => res.sendStatus(404),
+        onError: () => res.sendStatus(500)
+        });
+        }
+    })
 });
 
 module.exports = router;

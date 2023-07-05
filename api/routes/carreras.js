@@ -73,38 +73,52 @@ router.get("/:id", (req, res) => {
   });
 });
 
-router.put("/:id", (req, res) => {
-  const onSuccess = carrera =>
-    carrera
-      .update({ nombre: req.body.nombre }, { fields: ["nombre"] })
-      .then(() => res.sendStatus(200))
-      .catch(error => {
-        if (error == "SequelizeUniqueConstraintError: Validation error") {
-          res.status(400).send('Bad request: existe otra carrera con el mismo nombre')
-        }
-        else {
-          console.log(`Error al intentar actualizar la base de datos: ${error}`)
-          res.sendStatus(500)
-        }
+router.put("/:id",verificar, (req, res) => {
+  jwt.verify(req.token,'clave',(error,authData) =>{
+    if(error){
+      /*Acceso prohibido*/
+      res.sendStatus(403);
+    }else{
+      const onSuccess = carrera =>
+        carrera
+          .update({ nombre: req.body.nombre }, { fields: ["nombre"] })
+          .then(() => res.sendStatus(200))
+          .catch(error => {
+            if (error == "SequelizeUniqueConstraintError: Validation error") {
+              res.status(400).send('Bad request: existe otra carrera con el mismo nombre')
+            }
+            else {
+              console.log(`Error al intentar actualizar la base de datos: ${error}`)
+              res.sendStatus(500)
+            }
+          });
+        findCarrera(req.params.id, {
+        onSuccess,
+        onNotFound: () => res.sendStatus(404),
+        onError: () => res.sendStatus(500)
       });
-    findCarrera(req.params.id, {
-    onSuccess,
-    onNotFound: () => res.sendStatus(404),
-    onError: () => res.sendStatus(500)
-  });
+    }
+  })
 });
 
-router.delete("/:id", (req, res) => {
-  const onSuccess = carrera =>
-    carrera
-      .destroy()
-      .then(() => res.sendStatus(200))
-      .catch(() => res.sendStatus(500));
-  findCarrera(req.params.id, {
-    onSuccess,
-    onNotFound: () => res.sendStatus(404),
-    onError: () => res.sendStatus(500)
-  });
+router.delete("/:id",verificar, (req, res) => {
+  jwt.verify(req.token,'clave',(error,authData) =>{
+    if(error){
+      /*Acceso prohibido*/
+      res.sendStatus(403);
+    }else{
+      const onSuccess = carrera =>
+        carrera
+          .destroy()
+          .then(() => res.sendStatus(200))
+          .catch(() => res.sendStatus(500));
+      findCarrera(req.params.id, {
+        onSuccess,
+        onNotFound: () => res.sendStatus(404),
+        onError: () => res.sendStatus(500)
+      });
+    }
+  })
 });
 
 module.exports = router;
