@@ -7,12 +7,15 @@ var carrerasRouter = require('./routes/carreras');
 var materiasRouter = require('./routes/materias');
 var profesoresRouter = require('./routes/profesores');
 var horariosRouter = require('./routes/horarios');
-/* var loginRouter = require('./routes/login'); */
 var jwt = require("jsonwebtoken");
 
 var app = express();
 
 // jwt
+
+//clave secreta traida de variable de entorno local
+
+const claveSecreta = process.env.clave_secreta;
 
 app.post("/registro", (req , res) => {
   const usuario = {
@@ -20,7 +23,7 @@ app.post("/registro", (req , res) => {
     nombre: "admin"
   }
 
-  jwt.sign({user: usuario},'clave',{expiresIn:'180s'},(err,token)=>{
+  jwt.sign({user: usuario},claveSecreta,{expiresIn:'180s'},(err,token)=>{
     res.json({
       token
     })
